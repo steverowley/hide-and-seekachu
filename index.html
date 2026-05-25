@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Hide-and-Seekachu</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+
+    <section id="splash" class="screen">
+      <h1>Hide-and-Seekachu</h1>
+      <p class="subtitle">Find Pikachu hiding in famous paintings!</p>
+      <ol class="how-to">
+        <li>Pikachu is hidden in every picture.</li>
+        <li>Tap him when you find him.</li>
+        <li>Stuck? Press <strong>Hint</strong> for a clue.</li>
+      </ol>
+      <button id="start-btn" class="big-btn">Start</button>
+    </section>
+
+    <section id="game" class="screen hidden">
+      <header class="hud">
+        <div class="hud-left">
+          <h2 id="painting-title">&mdash;</h2>
+          <p id="painting-artist">&mdash;</p>
+        </div>
+        <div class="hud-right">
+          <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
+          <button id="hint-btn" class="hud-btn" type="button">Hint</button>
+          <button id="skip-btn" class="hud-btn" type="button">Skip</button>
+        </div>
+      </header>
+
+      <div id="stage">
+        <img id="painting-img" alt="" draggable="false" />
+        <div id="hint-overlay" class="hidden" aria-hidden="true"></div>
+        <div id="miss-marker" class="hidden" aria-hidden="true"></div>
+        <div id="celebration" class="hidden" aria-hidden="true">
+          <div class="celebration-text">You found him!</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameover" class="screen hidden">
+      <h1>You found them all!</h1>
+      <p class="final-score">Final score: <span id="final-score">0</span></p>
+      <button id="play-again-btn" class="big-btn" type="button">Play again</button>
+    </section>
+
+  </main>
+  <script src="paintings.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
