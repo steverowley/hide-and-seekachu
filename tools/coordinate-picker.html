@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coordinate Picker &mdash; Hide-and-Seekachu</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #f5f5f5;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { margin-top: 0; }
+    .instructions, .output {
+      background: #0d0d1f;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .instructions ol { margin: 8px 0; padding-left: 24px; }
+    .instructions code, .output code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 16px 0;
+    }
+    button, label.file-label {
+      padding: 10px 18px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      background: #ffd54a;
+      color: #1a1a2e;
+      font-weight: 600;
+      display: inline-block;
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: #f5f5f5;
+    }
+    input[type="file"] { display: none; }
+    #wrap {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      background: #0d0d1f;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #canvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      cursor: crosshair;
+    }
+    #wrap.empty {
+      width: 100%;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      border: 2px dashed #444;
+    }
+    #box {
+      position: absolute;
+      border: 3px solid #ffd54a;
+      background: rgba(255, 213, 74, 0.25);
+      pointer-events: none;
+    }
+    .marker {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ff5252;
+      border: 2px solid #fff;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .output {
+      margin-top: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+    }
+    .filename {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Coordinate Picker</h1>
+  <div class="instructions">
+    <p><strong>How to use:</strong></p>
+    <ol>
+      <li>Click <strong>Choose image</strong> and pick a painting variant from your <code>images/</code> folder.</li>
+      <li>Click the <strong>top-left corner</strong> of Pikachu in the picture.</li>
+      <li>Click the <strong>opposite (bottom-right) corner</strong>.</li>
+      <li>The JSON below updates with Pikachu's box. Click <strong>Copy</strong> and paste it into <code>paintings.js</code>.</li>
+    </ol>
+    <p style="opacity: 0.7; margin-bottom: 0;">Tip: make the box a little bigger than Pikachu so small fingers have an easier hitbox.</p>
+  </div>
+
+  <div class="controls">
+    <label class="file-label" for="file">Choose image</label>
+    <input type="file" id="file" accept="image/*" />
+    <span class="filename" id="filename"></span>
+    <button class="secondary" id="reset-btn" type="button">Reset clicks</button>
+  </div>
+
+  <div id="wrap" class="empty">
+    <span id="placeholder">No image loaded</span>
+    <img id="canvas" alt="" style="display:none" />
+    <div id="box" style="display:none"></div>
+    <div id="marker-1" class="marker" style="display:none"></div>
+    <div id="marker-2" class="marker" style="display:none"></div>
+  </div>
+
+  <div class="output" id="output">Choose an image to begin.</div>
+  <div class="controls">
+    <button id="copy-btn" type="button" style="display:none">Copy JSON</button>
+  </div>
+
+  <script>
+    const file = document.getElementById('file');
+    const canvas = document.getElementById('canvas');
+    const wrap = document.getElementById('wrap');
+    const placeholder = document.getElementById('placeholder');
+    const box = document.getElementById('box');
+    const m1 = document.getElementById('marker-1');
+    const m2 = document.getElementById('marker-2');
+    const output = document.getElementById('output');
+    const filenameEl = document.getElementById('filename');
+    const resetBtn = document.getElementById('reset-btn');
+    const copyBtn = document.getElementById('copy-btn');
+
+    let imageName = '';
+    let clicks = [];
+
+    file.addEventListener('change', () => {
+      const f = file.files[0];
+      if (!f) return;
+      imageName = f.name;
+      filenameEl.textContent = imageName;
+      canvas.src = URL.createObjectURL(f);
+      canvas.style.display = 'block';
+      wrap.classList.remove('empty');
+      placeholder.style.display = 'none';
+      resetClicks();
+      output.textContent = 'Image loaded. Click two opposite corners of Pikachu.';
+    });
+
+    function resetClicks() {
+      clicks = [];
+      box.style.display = 'none';
+      m1.style.display = 'none';
+      m2.style.display = 'none';
+      copyBtn.style.display = 'none';
+    }
+
+    resetBtn.addEventListener('click', () => {
+      resetClicks();
+      output.textContent = imageName
+        ? 'Cleared. Click two opposite corners of Pikachu.'
+        : 'Choose an image to begin.';
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.naturalWidth / rect.width;
+      const scaleY = canvas.naturalHeight / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      const dispX = e.clientX - rect.left;
+      const dispY = e.clientY - rect.top;
+
+      if (clicks.length >= 2) resetClicks();
+      clicks.push({ x, y, dispX, dispY });
+
+      const marker = clicks.length === 1 ? m1 : m2;
+      marker.style.left = `${dispX}px`;
+      marker.style.top = `${dispY}px`;
+      marker.style.display = 'block';
+
+      if (clicks.length === 2) {
+        renderBox();
+      } else {
+        output.textContent = `First corner: (${Math.round(x)}, ${Math.round(y)}). Now click the opposite corner of Pikachu.`;
+      }
+    });
+
+    function renderBox() {
+      const [a, b] = clicks;
+      const x0 = Math.min(a.x, b.x);
+      const y0 = Math.min(a.y, b.y);
+      const w = Math.abs(b.x - a.x);
+      const h = Math.abs(b.y - a.y);
+      const dx0 = Math.min(a.dispX, b.dispX);
+      const dy0 = Math.min(a.dispY, b.dispY);
+      const dw = Math.abs(b.dispX - a.dispX);
+      const dh = Math.abs(b.dispY - a.dispY);
+
+      box.style.display = 'block';
+      box.style.left = `${dx0}px`;
+      box.style.top = `${dy0}px`;
+      box.style.width = `${dw}px`;
+      box.style.height = `${dh}px`;
+
+      const json = `{
+  "image": "images/${imageName}",
+  "pikachu_box": { "x": ${Math.round(x0)}, "y": ${Math.round(y0)}, "width": ${Math.round(w)}, "height": ${Math.round(h)} }
+}`;
+      output.textContent = json;
+      copyBtn.dataset.json = json;
+      copyBtn.style.display = 'inline-block';
+    }
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(copyBtn.dataset.json);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => (copyBtn.textContent = 'Copy JSON'), 1500);
+      } catch {
+        copyBtn.textContent = 'Copy failed &mdash; select the text manually';
+      }
+    });
+  </script>
+</body>
+</html>
