@@ -6,6 +6,7 @@ A "Where's Waldo"-style web game where Pikachu is hidden in famous public-domain
 
 - [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) — the high-level plan: concept, scope, tech approach, and how the work splits between me and Claude Code.
 - [`BRIEF.md`](./BRIEF.md) — the prompt to paste as the first message to Claude Code. It builds the whole game from this.
+- [`IMAGE_PROMPTS.md`](./IMAGE_PROMPTS.md) — image-generation prompt templates for the 5 starter paintings, with hiding-spot variations and style notes.
 
 ## How to use
 
