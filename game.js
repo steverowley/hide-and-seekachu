@@ -248,18 +248,35 @@ function wireEvents() {
 
 function loadData() {
   const data = window.PAINTINGS_DATA;
-  if (!data || !Array.isArray(data.paintings) || data.paintings.length === 0) {
-    document.body.innerHTML =
-      '<p style="padding:24px;font-family:sans-serif">No painting data found. Check that <code>paintings.js</code> defines <code>window.PAINTINGS_DATA</code>.</p>';
-    return false;
-  }
+  if (!data || !Array.isArray(data.paintings)) return false;
   state.paintings = data.paintings;
   return true;
 }
 
+function showEmptyState() {
+  els.splash.innerHTML = `
+    <h1>Hide-and-Seekachu</h1>
+    <p class="subtitle">No paintings yet!</p>
+    <p style="max-width: 36ch; line-height: 1.6;">
+      Add some painting images to the <code>images/</code> folder and list them in
+      <code>paintings.js</code>, then reload.
+    </p>
+    <p style="max-width: 36ch; line-height: 1.6; opacity: 0.7;">
+      See <code>README.md</code> for the full step-by-step.
+    </p>
+  `;
+}
+
 function main() {
-  if (!loadData()) return;
+  if (!loadData()) {
+    document.body.innerHTML =
+      '<p style="padding:24px;font-family:sans-serif;color:#f5f5f5;background:#1a1a2e">Could not load painting data. Check that <code>paintings.js</code> defines <code>window.PAINTINGS_DATA</code>.</p>';
+    return;
+  }
   wireEvents();
+  if (state.paintings.length === 0) {
+    showEmptyState();
+  }
   showScreen('splash');
 }
 
