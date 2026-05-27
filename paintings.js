@@ -29,5 +29,25 @@
 //   }
 
 window.PAINTINGS_DATA = {
-  "paintings": []
+  "paintings": [
+    {
+      "id": "mondrian-composition",
+      "title": "Composition in Red, Blue, and Yellow",
+      "artist": "after Piet Mondrian",
+      "variants": [
+        {
+          "image": "images/mondrian-1.svg",
+          "pikachu_box": { "x": 80, "y": 100, "width": 80, "height": 80 }
+        },
+        {
+          "image": "images/mondrian-2.svg",
+          "pikachu_box": { "x": 220, "y": 600, "width": 80, "height": 80 }
+        },
+        {
+          "image": "images/mondrian-3.svg",
+          "pikachu_box": { "x": 520, "y": 800, "width": 80, "height": 80 }
+        }
+      ]
+    }
+  ]
 };
